@@ -120,9 +120,7 @@ function TRP2_ReceiveMessageChannel(message,sender)
 		if TRP3_API then return end; -- If TRP3 is present, we use TRP3's map location system
 		if messageTab[3] == "971" or messageTab[3] == "976" then -- Garrisons
 			if UnitInParty(Ambiguate(sender,"none")) then
-				if C_Garrison.IsUsingPartyGarrison() or UnitIsGroupLeader("player") then
-					TRP2_SendCoordonnees(sender,messageTab[3]);
-				end
+				TRP2_SendCoordonnees(sender,messageTab[3]);
 			end
 		else
 			TRP2_SendCoordonnees(sender,messageTab[3]);
@@ -158,17 +156,7 @@ local Ambiguate = Ambiguate;
 
 local function playersCanSeeEachOthers(sender)
 	if TRP2_LatestMapCoordZoneID == 971 or TRP2_LatestMapCoordZoneID == 976 then -- Garrisons
-		if UnitInParty(Ambiguate(sender,"none")) then
-			if C_Garrison.IsUsingPartyGarrison() then
-				return true;
-			elseif not C_Garrison.IsUsingPartyGarrison() and UnitIsGroupLeader("player") then
-				return true;
-			else
-				return false;
-			end
-		else
-			return true;
-		end
+		return UnitInParty(Ambiguate(sender,"none"));
 	else
 		return true;
 	end
@@ -180,8 +168,6 @@ function TRP2_receiveMessage(message,sender)
 	message = string.sub(message,string.len(prefixe)+2);
 	
 	print("RECU : "..prefixe.." "..sender);
-
-	print("Players can see each others : ", playersCanSeeEachOthers(sender));
 
 	------------------
 	--- VERNUM

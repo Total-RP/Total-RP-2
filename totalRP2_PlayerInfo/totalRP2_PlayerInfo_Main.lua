@@ -1092,15 +1092,6 @@ function TRP2_GetCoordonnees()
 		TRP2_Error(ERR_CLIENT_LOCKED_OUT);
 		return;
 	end
-	local currentMapZone = TRP2_GetCurrentMapZone();
-
-	-- GARRISONS TWEAK
-	if currentMapZone == 971 or currentMapZone == 976 then
-		local okay = C_Garrison.IsUsingPartyGarrison() or (not C_Garrison.IsUsingPartyGarrison() and UnitIsGroupLeader("player"));
-		if not okay then
-				return;
-		end
-	end
 
 	local infoTab = {};
 	infoTab[1] = TRP2_GetCurrentMapZone();
