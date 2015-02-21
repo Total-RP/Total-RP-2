@@ -88,6 +88,7 @@ function TRP2_SendContentToChannel(infoTab,prefix)
 end
 
 function TRP2_ReceiveMessageChannel(message,sender)
+	TRP2_debug(sender.." : "..message:gsub("\1","\\1"));
   -- Check if the sender is the player, should not do anything then
 	if TRP2_SimplifyNameIfPlayer(sender) == TRP2_Joueur or TRP2_EstIgnore(sender) or not TRP2_GetConfigValueFor("ActivateExchange",true) then
 		return;
@@ -99,6 +100,7 @@ function TRP2_ReceiveMessageChannel(message,sender)
 	end
 	
 	if messageTab[2] == "GetLocalCoord" then
+		if TRP3_API then return end;
 		TRP2_SendCoordonnees(sender,messageTab[3]);
 	elseif messageTab[2] == "LocalSound" then
 		TRP2_CalculateLocalSound(sender,messageTab[3],tonumber(messageTab[4]),tonumber(messageTab[5]),tonumber(messageTab[6]),tonumber(messageTab[7]));
@@ -123,10 +125,19 @@ function TRP2_ReceiveMessageChannel(message,sender)
 		TRP2_SendCoordonneesHouse(sender,messageTab[3]);
 	end
 	
-	
+
+end
+
+local function playersCanSeeEachOthers(sender)
+	if TRP2_LatestMapCoordZoneID == 971 or TRP2_LatestMapCoordZoneID == 976 then -- Garrisons
+		return UnitInParty(Ambiguate(sender,"none"));
+	else
+		return true;
+	end
 end
 
 function TRP2_receiveMessage(message,sender)
+	TRP2_debug(sender.." : "..message:gsub("\1","\\1"));
 	local prefixe = string.sub(message, 1, string.find(message,TRP2_ReservedChar)-1);
 	message = string.sub(message,string.len(prefixe)+2);
 	
@@ -157,19 +168,18 @@ function TRP2_receiveMessage(message,sender)
 	------------------
 	--- DIVERS
 	------------------
-	elseif prefixe == "SNHO" then --MAP Send House Coordonnees
+	elseif prefixe == "SNHO" then --MAP Send House Coordonneems
 		TRP2_AddHouseToMapTab(sender,TRP2_fetchInformations(message));
-	elseif prefixe == "SNPL" then --MAP Send Planque Coordonnees
+	elseif prefixe == "SNPL" and playersCanSeeEachOthers(sender) then --MAP Send Planque Coordonnees
 		TRP2_AddPlanqueToMapTab(sender,TRP2_fetchInformations(message));
-	elseif prefixe == "SNCC" then --MAP Send Coordonnees
-		print(UnitInParty(sender));
+	elseif prefixe == "SNCC" and playersCanSeeEachOthers(sender) then --MAP Send Coordonnees
 		TRP2_AddPlayerToMapTab(sender,TRP2_fetchInformations(message));
 	elseif prefixe == "MESS" then -- Message
 		local tab = TRP2_fetchInformations(message);
 		TRP2_Afficher(TRP2_FT(_G[tab[1]],tab[2],tab[3],tab[4],tab[5]));
 	elseif prefixe == "MERP" then -- Message RP
 		TRP2_Afficher(message,TRP2_GetConfigValueFor("InvMessageFrameRP",1),true);
-	elseif prefixe == "PLLS" then -- Play sound
+	elseif prefixe == "PLLS" and playersCanSeeEachOthers(sender) then -- Play sound
 		TRP2_PlayGroupSound(message,sender);
 	------------------
 	--- OBJECTS (n'importe quel tableau de données)
@@ -203,30 +213,30 @@ function TRP2_receiveMessage(message,sender)
 	------------------
 	--- PLANQUE
 	------------------
-	elseif prefixe == "PLSI" then --PLANQUE send info (from owner)
+	elseif prefixe == "PLSI" and playersCanSeeEachOthers(sender) then --PLANQUE send info (from owner)
 		TRP2_PlanqueReceiveInfo(sender,TRP2_fetchInformations(message));
-	elseif prefixe == "PLIN" then --PLANQUE init visit (from visitor)
+	elseif prefixe == "PLIN" and playersCanSeeEachOthers(sender) then --PLANQUE init visit (from visitor)
 		TRP2_PlanqueInitVisit(sender,message);
-	elseif prefixe == "PLSU" then --PLANQUE send update (from owner)
+	elseif prefixe == "PLSU" and playersCanSeeEachOthers(sender) then --PLANQUE send update (from owner)
 		TRP2_GetUpdateFromPlanque(sender,TRP2_fetchInformations(message));
-	elseif prefixe == "PLST" then --PLANQUE STOP (from owner)
+	elseif prefixe == "PLST" and playersCanSeeEachOthers(sender) then --PLANQUE STOP (from owner)
 		TRP2_PlanqueStop(sender,message);
-	elseif prefixe == "PLRL" then --PLANQUE Release lock (from visitor)
+	elseif prefixe == "PLRL" and playersCanSeeEachOthers(sender) then --PLANQUE Release lock (from visitor)
 		TRP2_PlanqueReleaseLock(sender,message);
-	elseif prefixe == "PLUL" then --PLANQUE send Update (from visitor)
+	elseif prefixe == "PLUL" and playersCanSeeEachOthers(sender) then --PLANQUE send Update (from visitor)
 		TRP2_GetUpdateFromVisitor(sender,TRP2_fetchInformations(message));
-	elseif prefixe == "PLLO" then --PLANQUE Log (from visitor)
+	elseif prefixe == "PLLO" and playersCanSeeEachOthers(sender) then --PLANQUE Log (from visitor)
 		TRP2_GetPlanqueLog(sender,TRP2_fetchInformations(message));
-	elseif prefixe == "PLAS" then --PLANQUE Ask (from visitor)
+	elseif prefixe == "PLAS" and playersCanSeeEachOthers(sender) then --PLANQUE Ask (from visitor)
 		TRP2_PlanqueAsk(sender,message);
-	elseif prefixe == "PLOK" then --PLANQUE Ask ok (from owner)
+	elseif prefixe == "PLOK" and playersCanSeeEachOthers(sender) then --PLANQUE Ask ok (from owner)
 		TRP2_PlanqueAskOk(sender);
 	------------------
 	--- PANNEAU
 	------------------
-	elseif prefixe == "PASI" then --PANNEAU send info (from owner)
+	elseif prefixe == "PASI" and playersCanSeeEachOthers(sender)  then --PANNEAU send info (from owner)
 		TRP2_PanneauReceiveInfo(sender,TRP2_fetchInformations(message));
-	elseif prefixe == "SNPA" then --MAP Send Panneau Coordonnees
+	elseif prefixe == "SNPA" and playersCanSeeEachOthers(sender)  then --MAP Send Panneau Coordonnees
 		TRP2_AddPanneauToMapTab(sender,TRP2_fetchInformations(message));
 	------------------
 	--- LANGAGE

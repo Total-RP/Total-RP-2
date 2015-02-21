@@ -1101,6 +1101,8 @@ function TRP2_GetCoordonnees()
 	TRP2_MapUpdate();
 end
 
+
+
 function TRP2_SendCoordonnees(sender,ZoneID)
 	if TRP2_GetConfigValueFor("MinimapShow",true) and sender and ZoneID then
 		ZoneID = tonumber(ZoneID);
@@ -1127,6 +1129,7 @@ function TRP2_AddPlayerToMapTab(personnage,tab)
 end
 
 function TRP2_GetCurrentMapZone()
+	TRP2_LatestMapCoordZoneID = GetCurrentMapAreaID();
 	return GetCurrentMapAreaID();
 end
 

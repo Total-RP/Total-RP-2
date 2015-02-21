@@ -62,6 +62,7 @@ function TRP2_OnLoad(self)
 	self:RegisterEvent("WORLD_MAP_UPDATE");
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
 	self:RegisterEvent("CHAT_MSG_CHANNEL_NOTICE");
+	self:RegisterEvent("WORLD_MAP_UPDATE");
 end
 
 TRP2_UPDATERTAB = {};
@@ -76,7 +77,15 @@ function TRP2_OnEvent(self,event,...)
 		if errorCall then
 			message("Total RP 2\nAn error occured during the loading of the addon. The addon won't work correctly !");
 		end
-		
+
+	elseif event=="WORLD_MAP_UPDATE" then
+		TRP2_debug("Should update map");
+		local i = 1;
+		while(getglobal("TRP2_WordMapPlayer"..i)) do
+			getglobal("TRP2_WordMapPlayer"..i):Hide();
+			i = i+1;
+		end
+		i = 0;
 	elseif event=="CHAT_MSG_ADDON" then
 		if arg1 == TRP2_COMM_PREFIX then
 			if TRP2_EstIgnore(arg2) or arg2 == TRP2_Joueur or not TRP2_GetConfigValueFor("ActivateExchange",true) then
