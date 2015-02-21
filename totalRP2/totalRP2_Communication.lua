@@ -8,6 +8,7 @@
 TRP2_COMM_VERSION = "1";
 TRP2_COMM_PREFIX = "TRP2."..TRP2_COMM_VERSION;
 TRP2_COMM_PREFIX_SIZE = string.len(TRP2_COMM_PREFIX);
+local print = TRP2_debug;
 
 -- print(IsAddonMessagePrefixRegistered(TRP2_COMM_PREFIX))
 
@@ -66,7 +67,7 @@ function TRP2_SecureSendAddonMessageGroup(Prefixe,Message, prior)
 	end
 end
 
-local BROADCAST_PREFIX = "RP";
+local BROADCAST_PREFIX = "RPB";
 local BROADCAST_VERSION = 1;
 local BROADCAST_SEPARATOR = "~";
 local BROADCAST_HEADER = BROADCAST_PREFIX .. BROADCAST_VERSION;
@@ -104,7 +105,7 @@ function TRP2_SendContentToChannel(infoTab,prefix)
 end
 
 function TRP2_ReceiveMessageChannel(message,sender)
-	TRP2_debug(sender.." : "..message:gsub("\1","\\1"));
+	print(sender.." : "..message:gsub("\1","\\1"));
   -- Check if the sender is the player, should not do anything then
 	if TRP2_SimplifyNameIfPlayer(sender) == TRP2_Joueur or TRP2_EstIgnore(sender) or not TRP2_GetConfigValueFor("ActivateExchange",true) then
 		return;
@@ -116,8 +117,16 @@ function TRP2_ReceiveMessageChannel(message,sender)
 	end
 	
 	if messageTab[2] == TRP2_BROADCAST_COMMANDS.GetLocalCoord then
-		if TRP3_API then return end;
-		TRP2_SendCoordonnees(sender,messageTab[3]);
+		if TRP3_API then return end; -- If TRP3 is present, we use TRP3's map location system
+		if messageTab[3] == "971" or messageTab[3] == "976" then -- Garrisons
+			if UnitInParty(Ambiguate(sender,"none")) then
+				if C_Garrison.IsUsingPartyGarrison() or UnitIsGroupLeader("player") then
+					TRP2_SendCoordonnees(sender,messageTab[3]);
+				end
+			end
+		else
+			TRP2_SendCoordonnees(sender,messageTab[3]);
+		end
 	elseif messageTab[2] == TRP2_BROADCAST_COMMANDS.LocalSound then
 		TRP2_CalculateLocalSound(sender,messageTab[3],tonumber(messageTab[4]),tonumber(messageTab[5]),tonumber(messageTab[6]),tonumber(messageTab[7]));
 	elseif messageTab[2] == TRP2_BROADCAST_COMMANDS.HELLO then
@@ -144,20 +153,35 @@ function TRP2_ReceiveMessageChannel(message,sender)
 
 end
 
+local UnitInParty = UnitInParty;
+local Ambiguate = Ambiguate;
+
 local function playersCanSeeEachOthers(sender)
 	if TRP2_LatestMapCoordZoneID == 971 or TRP2_LatestMapCoordZoneID == 976 then -- Garrisons
-		return UnitInParty(Ambiguate(sender,"none"));
+		if UnitInParty(Ambiguate(sender,"none")) then
+			if C_Garrison.IsUsingPartyGarrison() then
+				return true;
+			elseif not C_Garrison.IsUsingPartyGarrison() and UnitIsGroupLeader("player") then
+				return true;
+			else
+				return false;
+			end
+		else
+			return true;
+		end
 	else
 		return true;
 	end
 end
 
 function TRP2_receiveMessage(message,sender)
-	TRP2_debug(sender.." : "..message:gsub("\1","\\1"));
+	print(sender.." : "..message:gsub("\1","\\1"));
 	local prefixe = string.sub(message, 1, string.find(message,TRP2_ReservedChar)-1);
 	message = string.sub(message,string.len(prefixe)+2);
 	
-	TRP2_debug("RECU : "..prefixe.." "..sender);
+	print("RECU : "..prefixe.." "..sender);
+
+	print("Players can see each others : ", playersCanSeeEachOthers(sender));
 
 	------------------
 	--- VERNUM
