@@ -68,17 +68,33 @@ end
 
 local BROADCAST_PREFIX = "RP";
 local BROADCAST_VERSION = 1;
-local BROADCAST_SEPARATOR = TRP2_ReservedChar;
---local BROADCAST_HEADER = BROADCAST_PREFIX .. BROADCAST_VERSION;
-local BROADCAST_HEADER=TRP2_COMM_PREFIX;
+local BROADCAST_SEPARATOR = "~";
+local BROADCAST_HEADER = BROADCAST_PREFIX .. BROADCAST_VERSION;
+
+local TRP2_BROADCAST_COMMANDS = {
+	HELLO = "TRP2HELLO",
+	GetLocalCoord = "GetLocalCoord",
+	LocalSound = "TRP2LocalSound",
+	GetPlanque = "TRP2GetPlanque",
+	GetLocalPlanquesCoord = "TRP2GetLocalPlanquesCoord",
+	GetPanneau = "TRP2GetPanneau",
+	GetLocalPanneauxCoord = "TRP2GetLocalPanneauxCoord",
+	GetLocalHousesCoord = "TRP2GetLocalHousesCoord",
+
+}
+
 function TRP2_SendContentToChannel(infoTab,prefix)
 	if not TRP2_GetConfigValueFor("UseBroadcast",true) or not TRP2_GetConfigValueFor("ActivateExchange",true) then
 		return;
+	end
+	if TRP2_BROADCAST_COMMANDS[prefix] then
+		prefix = TRP2_BROADCAST_COMMANDS[prefix]
 	end
 	local message = BROADCAST_HEADER .. BROADCAST_SEPARATOR .. prefix;
 	for _,info in pairs(infoTab) do
 		message = message..BROADCAST_SEPARATOR..info;
 	end
+	print(message);
 	if string.len(message) < 254 then
 		local channelName = GetChannelName(TRP2_GetConfigValueFor("ChannelToUse","xtensionxtooltip2"));
 		ChatThrottleLib:SendChatMessage("NORMAL", TRP2_COMM_PREFIX, message, "CHANNEL", select(2, GetDefaultLanguage("player")), channelName);
@@ -99,12 +115,12 @@ function TRP2_ReceiveMessageChannel(message,sender)
 		return;
 	end
 	
-	if messageTab[2] == "GetLocalCoord" then
+	if messageTab[2] == TRP2_BROADCAST_COMMANDS.GetLocalCoord then
 		if TRP3_API then return end;
 		TRP2_SendCoordonnees(sender,messageTab[3]);
-	elseif messageTab[2] == "LocalSound" then
+	elseif messageTab[2] == TRP2_BROADCAST_COMMANDS.LocalSound then
 		TRP2_CalculateLocalSound(sender,messageTab[3],tonumber(messageTab[4]),tonumber(messageTab[5]),tonumber(messageTab[6]),tonumber(messageTab[7]));
-	elseif messageTab[2] == "HELLO" then
+	elseif messageTab[2] == TRP2_BROADCAST_COMMANDS.HELLO then
 		if tonumber(messageTab[3]) and not TRP2_bAlreadyTell and (tonumber(messageTab[3]) > tonumber(TRP2_version)) and TRP2_GetConfigValueFor("NotifyOnNew",true) then
 			TRP2_bAlreadyTell = true;
 			TRP2_NewVersionDispo(tonumber(messageTab[3]));
@@ -113,15 +129,15 @@ function TRP2_ReceiveMessageChannel(message,sender)
 			local nom = TRP2_UnitNameWithRealm("target");
 			TRP2_AjouterAuRegistre(sender, nom == sender);
 		end
-	elseif messageTab[2] == "GetPlanque" then
+	elseif messageTab[2] == TRP2_BROADCAST_COMMANDS.GetPlanque then
 		TRP2_ChanGetPlanque(sender,messageTab[3]);
-	elseif messageTab[2] == "GetPanneau" then
+	elseif messageTab[2] == TRP2_BROADCAST_COMMANDS.GetPanneau then
 		TRP2_ChanGetPanneau(sender,messageTab[3]);
-	elseif messageTab[2] == "GetLocalPlanquesCoord" then
+	elseif messageTab[2] == TRP2_BROADCAST_COMMANDS.GetLocalPlanquesCoord then
 		TRP2_SendCoordonneesPlanque(sender,messageTab[3]);
-	elseif messageTab[2] == "GetLocalPanneauxCoord" then
+	elseif messageTab[2] == TRP2_BROADCAST_COMMANDS.GetLocalPanneauxCoord then
 		TRP2_SendCoordonneesPanneau(sender,messageTab[3]);
-	elseif messageTab[2] == "GetLocalHousesCoord" then
+	elseif messageTab[2] == TRP2_BROADCAST_COMMANDS.GetLocalHousesCoord then
 		TRP2_SendCoordonneesHouse(sender,messageTab[3]);
 	end
 	
