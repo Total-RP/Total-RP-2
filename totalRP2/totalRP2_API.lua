@@ -160,8 +160,8 @@ function TRP2_SuperFetchInformations(tab)
 	return nil;
 end
 
-function TRP2_fetchInformations(message)
-	return TRP2_FetchToTabWithSeparator(message,TRP2_ReservedChar);
+function TRP2_fetchInformations(message, reservedChar)
+	return TRP2_FetchToTabWithSeparator(message, reservedChar or TRP2_ReservedChar);
 end
 
 function TRP2_FetchToTabWithSeparator(message,separator)

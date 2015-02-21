@@ -66,17 +66,22 @@ function TRP2_SecureSendAddonMessageGroup(Prefixe,Message, prior)
 	end
 end
 
+local BROADCAST_PREFIX = "RP";
+local BROADCAST_VERSION = 1;
+local BROADCAST_SEPARATOR = "~";
+local BROADCAST_HEADER = BROADCAST_PREFIX .. BROADCAST_VERSION;
+
 function TRP2_SendContentToChannel(infoTab,prefix)
 	if not TRP2_GetConfigValueFor("UseBroadcast",true) or not TRP2_GetConfigValueFor("ActivateExchange",true) then
 		return;
 	end
-	local message = TRP2_COMM_PREFIX..TRP2_ReservedChar..prefix;
+	local message = BROADCAST_HEADER .. BROADCAST_SEPARATOR .. prefix;
 	for _,info in pairs(infoTab) do
-		message = message..TRP2_ReservedChar..info;
+		message = message..BROADCAST_SEPARATOR..info;
 	end
 	if string.len(message) < 254 then
 		local channelName = GetChannelName(TRP2_GetConfigValueFor("ChannelToUse","xtensionxtooltip2"));
-		ChatThrottleLib:SendChatMessage("NORMAL",TRP2_COMM_PREFIX, message, "CHANNEL", select(2, GetDefaultLanguage("player")), channelName);
+		ChatThrottleLib:SendChatMessage("NORMAL", TRP2_COMM_PREFIX, message, "CHANNEL", select(2, GetDefaultLanguage("player")), channelName);
 	else
 		TRP2_Error("Internal Error : Tentative de TRP2_SendContentToChannel avec une taille de "..string.len(message).."!\nEnvoi annulé !");
 	end
@@ -87,9 +92,9 @@ function TRP2_ReceiveMessageChannel(message,sender)
 	if TRP2_SimplifyNameIfPlayer(sender) == TRP2_Joueur or TRP2_EstIgnore(sender) or not TRP2_GetConfigValueFor("ActivateExchange",true) then
 		return;
 	end
-	local messageTab = TRP2_fetchInformations(message);
+	local messageTab = TRP2_fetchInformations(message, TRP2_ReservedCharBroadcast);
 	-- Un message n'est jamais seul.
-	if not messageTab[1] == TRP2_COMM_PREFIX or not messageTab[2] then
+	if not messageTab[1] == BROADCAST_HEADER or not messageTab[2] then
 		return;
 	end
 	

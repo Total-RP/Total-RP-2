@@ -231,6 +231,7 @@ TRP2_PanneauList = {};
 TRP2_Saved_ChatFrameEvent = nil;
 
 TRP2_ReservedChar = '\1';
+TRP2_ReservedCharBroadcast = '~';
 TRP2_IDSIZE = 18;
 
 TRP2_compagnonPrefixe = {
