@@ -68,9 +68,9 @@ end
 
 local BROADCAST_PREFIX = "RP";
 local BROADCAST_VERSION = 1;
-local BROADCAST_SEPARATOR = "~";
-local BROADCAST_HEADER = BROADCAST_PREFIX .. BROADCAST_VERSION;
-
+local BROADCAST_SEPARATOR = TRP2_ReservedChar;
+--local BROADCAST_HEADER = BROADCAST_PREFIX .. BROADCAST_VERSION;
+local BROADCAST_HEADER=TRP2_COMM_PREFIX;
 function TRP2_SendContentToChannel(infoTab,prefix)
 	if not TRP2_GetConfigValueFor("UseBroadcast",true) or not TRP2_GetConfigValueFor("ActivateExchange",true) then
 		return;
@@ -162,6 +162,7 @@ function TRP2_receiveMessage(message,sender)
 	elseif prefixe == "SNPL" then --MAP Send Planque Coordonnees
 		TRP2_AddPlanqueToMapTab(sender,TRP2_fetchInformations(message));
 	elseif prefixe == "SNCC" then --MAP Send Coordonnees
+		print(UnitInParty(sender));
 		TRP2_AddPlayerToMapTab(sender,TRP2_fetchInformations(message));
 	elseif prefixe == "MESS" then -- Message
 		local tab = TRP2_fetchInformations(message);
