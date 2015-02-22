@@ -1017,47 +1017,49 @@ end
 -- CARTES ET COORDONNEES
 ----------------------------------------------------------
 TRP2_MINIMAPBUTTON = {};
+local playersButton = {};
 
 -- Update de la map quand on recois un nouveau perso dans le tab
 function TRP2_MapUpdate()
+
 	if not TRP2_GetWorldMap():IsVisible() then
 		return;
 	end
-	-- On cache tout !
-	local i = 1;
-	while(getglobal("TRP2_WordMapPlayer"..i)) do
-		getglobal("TRP2_WordMapPlayer"..i):Hide();
-		i = i+1;
+	TRP2_MapCurrentlyDisplayed = GetCurrentMapAreaID();
+
+	for _, button in pairs(playersButton) do
+		button:Hide();
 	end
-	i = 0;
-	
+
+	local i = 0;
 	for perso, persoTab in pairs(TRP2_PlayersPosition) do
 		i = i+1;
-		local playerButton = _G["TRP2_WordMapPlayer"..i];
+		local playerButton = playersButton[i];
 		local partyX = persoTab["x"];
 		local partyY = persoTab["y"];
 		if not playerButton then
-			playerButton = CreateFrame("Frame","TRP2_WordMapPlayer"..i,WorldMapButton,"WorldMapRaidUnitTemplate")
+			playerButton = CreateFrame("Frame","TRP2_WordMapPlayer"..i,WorldMapButton,"WorldMapRaidUnitTemplate");
+			playerButton.Icon = _G["TRP2_WordMapPlayer"..i.."Icon"];
+			tinsert(playersButton,playerButton);
 		end
 		partyX = partyX * WorldMapDetailFrame:GetWidth();
 		partyY = -partyY * WorldMapDetailFrame:GetHeight();
-		_G["TRP2_WordMapPlayer"..i.."Icon"]:SetTexture("Interface\\Minimap\\OBJECTICONS");
+		playerButton.Icon:SetTexture("Interface\\Minimap\\OBJECTICONS");
 		if TRP2_GetInfo(perso,"Seen") then
-			_G["TRP2_WordMapPlayer"..i.."Icon"]:SetTexCoord(0, 0.125, 0, 0.125);
+			playerButton.Icon:SetTexCoord(0, 0.125, 0, 0.125);
 		else
-			_G["TRP2_WordMapPlayer"..i.."Icon"]:SetTexCoord(0.125, 0.250, 0, 0.125);
+			playerButton.Icon:SetTexCoord(0.125, 0.250, 0, 0.125);
 		end
 		playerButton.name = perso;
 		playerButton:SetPoint("CENTER", "WorldMapDetailFrame", "TOPLEFT", partyX, partyY);
 		playerButton:SetScript("OnEnter", function(self)
 			WorldMapPOIFrame.allowBlobTooltip = false;
-			local j=1;
 			WorldMapTooltip:Hide();
 			WorldMapTooltip:SetOwner(self, "ANCHOR_RIGHT",0,0);
 			WorldMapTooltip:AddLine(TRP2_CTS("|TInterface\\ICONS\\Achievement_GuildPerk_EverybodysFriend:18:18|t "..TRP2_LOC_AFFICHERGENS.." :"), 1, 1, 1,true);
-			while(_G["TRP2_WordMapPlayer"..j]) do
-				if _G["TRP2_WordMapPlayer"..j]:IsVisible() and _G["TRP2_WordMapPlayer"..j]:IsMouseOver() then
-					local name = _G["TRP2_WordMapPlayer"..j].name;
+			for _, button in pairs(playersButton) do
+				if button:IsVisible() and button:IsMouseOver() then
+					local name = button.name;
 					if name then
 						local icone = "";
 						if TRP2_EmptyToNil(TRP2_GetInfo(name,"Actu",{})["PlayerIcon"]) then
@@ -1066,10 +1068,12 @@ function TRP2_MapUpdate()
 							icone = " |TInterface\\ICONS\\"..TRP2_textureRace[TRP2_enRace][TRP2_textureSex[UnitSex("player")]]..":18:18|t";
 						end
 						name = TRP2_nomComplet(name,true);
+						if  persoTab["addon"] and persoTab["addon"] ~= TRP2_ShortName then
+							name = name.." {o}("..persoTab["addon"]..")";
+						end
 						WorldMapTooltip:AddLine(TRP2_CTS("- "..name..icone), 1, 1, 1,true);
 					end
 				end
-				j = j+1;
 			end
 			WorldMapTooltip:Show();
 		end);
@@ -1106,14 +1110,17 @@ end
 function TRP2_SendCoordonnees(sender,ZoneID)
 	if TRP2_GetConfigValueFor("MinimapShow",true) and sender and ZoneID then
 		ZoneID = tonumber(ZoneID);
-		if TRP2_GetWorldMap():IsVisible() then
-			return;
-		end
+		local shouldRefreshMapPoints = TRP2_WordMapPlayer1 and TRP2_WordMapPlayer1:IsVisible();
+		local currentMapID = GetCurrentMapAreaID();
 		SetMapToCurrentZone();
 		local x,y = GetPlayerMapPosition("player");
 		local zoneNum = TRP2_GetCurrentMapZone();
 		if zoneNum == ZoneID then
-			TRP2_SecureSendAddonMessage("SNCC",x..TRP2_ReservedChar..y,sender);
+			TRP2_SendP2PMessage(sender,TRP2_BROADCAST_COMMANDS.GetLocalCoord, x, y, zoneNum, TRP2_ShortName);
+		end
+		SetMapByID(currentMapID);
+		if shouldRefreshMapPoints then
+			TRP2_MapUpdate()
 		end
 	end
 end
@@ -1125,6 +1132,7 @@ function TRP2_AddPlayerToMapTab(personnage,tab)
 	TRP2_PlayersPosition[personnage] = {};
 	TRP2_PlayersPosition[personnage]["x"] = tab[1];
 	TRP2_PlayersPosition[personnage]["y"] = tab[2];
+	TRP2_PlayersPosition[personnage]["addon"] = tab[3];
 	TRP2_MapUpdate();
 end
 

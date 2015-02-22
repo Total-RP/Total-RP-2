@@ -79,19 +79,22 @@ function TRP2_OnEvent(self,event,...)
 		end
 
 	elseif event=="WORLD_MAP_UPDATE" then
-		TRP2_debug("Should update map");
-		local i = 1;
-		while(getglobal("TRP2_WordMapPlayer"..i)) do
-			getglobal("TRP2_WordMapPlayer"..i):Hide();
-			i = i+1;
+		if TRP2_MapCurrentlyDisplayed and TRP2_MapCurrentlyDisplayed ~= GetCurrentMapAreaID() then
+			TRP2_debug("Should update map");
+			local i = 1;
+			while(getglobal("TRP2_WordMapPlayer"..i)) do
+				getglobal("TRP2_WordMapPlayer"..i):Hide();
+				i = i+1;
+			end
 		end
-		i = 0;
 	elseif event=="CHAT_MSG_ADDON" then
 		if arg1 == TRP2_COMM_PREFIX then
-			if TRP2_EstIgnore(arg2) or arg2 == TRP2_Joueur or not TRP2_GetConfigValueFor("ActivateExchange",true) then
+			if TRP2_EstIgnore(arg4) or Ambiguate(arg4,"none") == TRP2_Joueur or not TRP2_GetConfigValueFor("ActivateExchange",true) then
 				return;
 			end
 			TRP2_receiveMessage(arg2,arg4);
+		elseif arg1 == RP_BROADCAST_HEADER then
+			TRP2_OnP2PMessageRecevied(arg2, arg4)
 		end
 	elseif event=="CHAT_MSG_CHANNEL_NOTICE" then
 		if arg1 == "YOU_JOINED" then
@@ -99,6 +102,7 @@ function TRP2_OnEvent(self,event,...)
 		end
 	elseif event=="PLAYER_ENTERING_WORLD" then
 		RegisterAddonMessagePrefix(TRP2_COMM_PREFIX);
+		RegisterAddonMessagePrefix(RP_BROADCAST_HEADER);
 	elseif(event=="UPDATE_MOUSEOVER_UNIT") then
 		local nom,royaume = UnitName("mouseover");
 		if royaume then

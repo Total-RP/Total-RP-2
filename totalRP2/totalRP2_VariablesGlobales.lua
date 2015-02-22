@@ -24,6 +24,7 @@ TRP2_bAlreadyTellRSP = false;
 TRP2_PrecisionPlanque = 250;
 TRP2_UPDATEDOCUSENSI = 1.5;
 TRP2_font = 'FRIZQT__.TTF';
+TRP2_ShortName = "TRP2";
 
 TRP2_DesBarres = "-----------------------------------";
 
