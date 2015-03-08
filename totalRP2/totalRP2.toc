@@ -1,0 +1,27 @@
+## Interface: 60100
+## Title: Total RP 2
+## Title-frFR: Total RP 2
+## Title-esES: Total RP 2
+## Title-deDE: Total RP 2
+## Title-zhCN: Total RP 2
+## Author: Telkostrasz, Lixxel, Ellypse
+## Version: 1.033
+## Notes: Main module
+## Notes-frFR: Module principal
+## Notes-esES: Módulo principal
+## Notes-deDE: Hauptmodul
+## Notes-zhCN: 核心模块
+## URL: http://trp2.forumotion.com
+## RequiredDeps: totalRP2_DataBase,totalRP2_Guide,totalRP2_PlayerInfo,totalRP2_ImpExport,totalRP2_Registre,totalRP2_Documents,totalRP2_Config,totalRP2_Inventaire,totalRP2_Interface,totalRP2_Language,totalRP2_Quests,totalRP2_Auras,totalRP2_Creation,totalRP2_Packages
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## SavedVariables: totalRP2
+## OptionalDeps: totalRP3
+embeds.xml
+
+libs\LibStub\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
+
+totalRP2.xml
