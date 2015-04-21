@@ -7,7 +7,7 @@
 
 function TRP2_MakeItemLink(item, perso)
 	if string.len(item) > 0 then
-		return "|cff00ff00["..item.."]|h|r";
+		return "|cff00ff00|Htotalrp2:"..perso.."|h["..item.."]|h|r";
 	else
 		return "~~";
 	end

@@ -1442,32 +1442,25 @@ function TRP2_HookAll()
 end
 
 function TRP2_ItemRef()
-	if true then return; end
---	function TRP2_SetItemRef(self, link, text, button)
---		print(strsub(link, 1, 7));
---		print(link,text,button)
---		local tab = TRP2_FetchToTabWithSeparator(link,":");
---		if ( strsub(link, 1, 7) == "sharess" ) then
---			local _, index = strsplit(":", link);
---			SocialFrame_LoadUI();
---			SocialPostFrame_ShowScreenshot(tonumber(index));
---			return;
---		end;
---		if tab[1] == "player" and button == "RightButton" and IsControlKeyDown() then
---			TRP2CHATNAME = tab[2];
---			TRP2_InitUIDropDown(TRP2_DD_PotraitIconeClick);
---			return;
---		elseif tab[1] == "totalrp2" then
---			local item = string.match(text,"%[(.*)%]");
---			if tab[2] and item then
---				TRP2_HandleItemLink(tab[2], item, chatFrame);
---			end
---			return;
---		end
---		TRP2_Saved_SetItemRef(link, text, button, self);
---	end
---	TRP2_Saved_SetItemRef = ChatFrame_OnHyperlinkShow;
---	ChatFrame_OnHyperlinkShow = TRP2_SetItemRef;
+
+	hooksecurefunc("ChatFrame_OnHyperlinkShow", function(chatframe, link, text, button)
+		local tab = TRP2_FetchToTabWithSeparator(link,":");
+		if tab[1] == "totalrp2" then
+			local item = string.match(text,"%[(.*)%]");
+			if tab[2] and item then
+				TRP2_HandleItemLink(tab[2], item, chatframe);
+			end
+			return;
+		end
+		return nil;
+	end);
+
+	local hook_ItemRefTooltip_SetHyperlink = ItemRefTooltip["SetHyperlink"];
+	function ItemRefTooltip:SetHyperlink(link, ...)
+		local tab = TRP2_FetchToTabWithSeparator(link,":");
+		if tab[1] == "totalrp2" then return nil end;
+		return hook_ItemRefTooltip_SetHyperlink(self, link, ...);
+	end
 end
 
 TRP2_ACTUALEDITBOX = nil;

@@ -9,7 +9,7 @@
 TRP2_CHATLINK_CACHE = {};
 
 function TRP2_HandleItemLink(owner, itemName, chatFrame)
-	if owner == TRP2_Joueur then
+	if Ambiguate(owner, "none") == TRP2_Joueur then
 		if TRP2_CHATLINK_CACHE[itemName] then
 			TRP2_ShowItemLink(TRP2_CHATLINK_CACHE[itemName]);
 		end
